@@ -2,7 +2,6 @@ package pl.com.bottega.simplelib2.model;
 
 import org.junit.Test;
 import pl.com.bottega.simplelib2.application.user.BookDto;
-import pl.com.bottega.simplelib2.application.user.BookDtoBuilder;
 import pl.com.bottega.simplelib2.model.commands.BorrowCommand;
 import pl.com.bottega.simplelib2.model.commands.CreateBookCommand;
 import pl.com.bottega.simplelib2.model.commands.RemoveBookCommand;
@@ -12,9 +11,8 @@ import java.time.Year;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static pl.com.bottega.simplelib2.model.BookStatus.AVAILABLE;
-import static pl.com.bottega.simplelib2.model.BookStatus.BORROWED;
-import static pl.com.bottega.simplelib2.model.BookStatus.REMOVED;
+import static pl.com.bottega.simplelib2.TestBookCreator.*;
+import static pl.com.bottega.simplelib2.model.BookStatus.*;
 
 public class BookTest {
 
@@ -25,7 +23,7 @@ public class BookTest {
 		//when
 		Book book = new Book(command);
 		//then
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		assertThat(bookDto.getId()).isNotNull();
 	}
 
@@ -36,8 +34,8 @@ public class BookTest {
 		//when
 		Book firstBook = new Book(command);
 		Book secondBook = new Book(command);
-		BookDto firstBookDto = generateBookDto(firstBook);
-		BookDto secondBookDto = generateBookDto(secondBook);
+		BookDto firstBookDto = exportBookDto(firstBook);
+		BookDto secondBookDto = exportBookDto(secondBook);
 		//then
 		assertThat(firstBookDto.getId()).isNotEqualTo(secondBookDto.getId());
 	}
@@ -50,7 +48,7 @@ public class BookTest {
 		command.setTitle(title);
 		//when
 		Book book = new Book(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getTitle()).isEqualTo(title);
 	}
@@ -63,7 +61,7 @@ public class BookTest {
 		command.setYear(year);
 		//when
 		Book book = new Book(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getYear()).isEqualTo(year);
 	}
@@ -76,7 +74,7 @@ public class BookTest {
 		command.setAuthor(author);
 		//when
 		Book book = new Book(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getAuthor()).isEqualTo(author);
 	}
@@ -87,7 +85,7 @@ public class BookTest {
 		CreateBookCommand command = new CreateBookCommand();
 		//when
 		Book book = new Book(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getStatus()).isEqualTo(AVAILABLE.toString());
 	}
@@ -95,11 +93,11 @@ public class BookTest {
 	@Test
 	public void shouldSetStatusToRemovedOnRemoval() {
 		//given
-		Book book = createBook();
+		Book book = createNewBook();
 		RemoveBookCommand command = new RemoveBookCommand();
 		//when
 		book.remove(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getStatus()).isEqualTo(REMOVED.toString());
 	}
@@ -107,11 +105,11 @@ public class BookTest {
 	@Test
 	public void shouldSetStatusToBorrowedOnBorrowing() {
 		//given
-		Book book = createBook();
+		Book book = createNewBook();
 		BorrowCommand command = new BorrowCommand();
 		//when
 		book.borrow(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getStatus()).isEqualTo(BORROWED.toString());
 	}
@@ -119,13 +117,13 @@ public class BookTest {
 	@Test
 	public void shouldRememberTheNameOfLastBorrower() {
 		//given
-		Book book = createBook();
+		Book book = createNewBook();
 		BorrowCommand command = new BorrowCommand();
 		String borrower = "Pan Kracy";
 		command.setBorrower(borrower);
 		//when
 		book.borrow(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getBorrower()).isEqualTo(borrower);
 	}
@@ -133,11 +131,11 @@ public class BookTest {
 	@Test
 	public void shouldSetStatusToAvailableOnTurningBack() {
 		//given
-		Book book = borrowedBook();
+		Book book = createBorrowedBook();
 		TurnBackCommand command = new TurnBackCommand();
 		//when
 		book.turnBack(command);
-		BookDto bookDto = generateBookDto(book);
+		BookDto bookDto = exportBookDto(book);
 		//then
 		assertThat(bookDto.getStatus()).isEqualTo(AVAILABLE.toString());
 	}
@@ -145,8 +143,8 @@ public class BookTest {
 	@Test
 	public void shouldNotAllowToRemoveWhileNotAvailable() {
 		//given
-		Book book = removedBook();
-		BookDto bookDto = generateBookDto(book);
+		Book book = createRemovedBook();
+		BookDto bookDto = exportBookDto(book);
 		assertThat(bookDto.getStatus()).isNotEqualTo(AVAILABLE.toString());
 		RemoveBookCommand command = new RemoveBookCommand();
 		//when
@@ -158,8 +156,8 @@ public class BookTest {
 	@Test
 	public void shouldNotAllowToBorrowWhenNotAvailable() {
 		//given
-		Book book = removedBook();
-		BookDto bookDto = generateBookDto(book);
+		Book book = createRemovedBook();
+		BookDto bookDto = exportBookDto(book);
 		assertThat(bookDto.getStatus()).isNotEqualTo(AVAILABLE.toString());
 		BorrowCommand command = new BorrowCommand();
 		//when
@@ -171,42 +169,14 @@ public class BookTest {
 	@Test
 	public void shouldNotAllowToTurnBackWhenNotBorrowed() {
 		//given
-		Book book = createBook();
-		BookDto bookDto = generateBookDto(book);
+		Book book = createNewBook();
+		BookDto bookDto = exportBookDto(book);
 		assertThat(bookDto.getStatus()).isNotEqualTo(BORROWED.toString());
 		TurnBackCommand command = new TurnBackCommand();
 		//when
 		Throwable thrown = catchThrowable(() -> book.turnBack(command) );
 		//then
 		assertThat(thrown).isInstanceOf(BookStatusException.class);
-	}
-
-	private BookDto generateBookDto(Book book) {
-		BookDtoBuilder builder = new BookDtoBuilder();
-		book.export(builder);
-		return builder.build();
-	}
-
-	private Book createBook() {
-		CreateBookCommand command = new CreateBookCommand();
-		command.setTitle("The Importance of Being Earnest");
-		command.setYear(Year.parse("1895"));
-		command.setAuthor("Oscar Wilde");
-		return new Book(command);
-	}
-
-	private Book removedBook() {
-		Book book = createBook();
-		RemoveBookCommand command = new RemoveBookCommand();
-		book.remove(command);
-		return book;
-	}
-
-	private Book borrowedBook() {
-		Book book = createBook();
-		BorrowCommand command = new BorrowCommand();
-		book.borrow(command);
-		return book;
 	}
 
 }

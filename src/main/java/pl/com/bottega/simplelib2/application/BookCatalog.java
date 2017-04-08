@@ -1,15 +1,16 @@
 package pl.com.bottega.simplelib2.application;
 
 import pl.com.bottega.simplelib2.application.user.BookDto;
-import pl.com.bottega.simplelib2.application.user.BookSearchQuery;
+import pl.com.bottega.simplelib2.application.user.BookQuery;
 import pl.com.bottega.simplelib2.application.user.BookSearchResults;
-
-import java.util.UUID;
+import pl.com.bottega.simplelib2.model.BookId;
 
 public interface BookCatalog {
 
-	BookSearchResults find(BookSearchQuery query);
+	BookSearchResults list();
 
-	BookDto get(UUID bookId);
+	BookSearchResults find(BookQuery query);
+
+	BookDto get(BookId bookId);
 
 }

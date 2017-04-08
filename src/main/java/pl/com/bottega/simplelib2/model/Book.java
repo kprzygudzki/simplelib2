@@ -5,15 +5,19 @@ import pl.com.bottega.simplelib2.model.commands.CreateBookCommand;
 import pl.com.bottega.simplelib2.model.commands.RemoveBookCommand;
 import pl.com.bottega.simplelib2.model.commands.TurnBackCommand;
 
+import javax.persistence.EmbeddedId;
+import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import java.time.Year;
 
 import static pl.com.bottega.simplelib2.model.BookStatus.AVAILABLE;
-import static pl.com.bottega.simplelib2.model.BookStatus.BORROWED;
-import static pl.com.bottega.simplelib2.model.BookStatus.REMOVED;
 
+@Entity
 public class Book {
 
+	@EmbeddedId
 	private BookId id;
+	@Enumerated
 	private BookStatus status;
 	private String title;
 	private Year year;
@@ -29,6 +33,7 @@ public class Book {
 		this.title = command.getTitle();
 		this.year = command.getYear();
 		this.author = command.getAuthor();
+		this.borrower = null;
 	}
 
 	public void remove(RemoveBookCommand command) {

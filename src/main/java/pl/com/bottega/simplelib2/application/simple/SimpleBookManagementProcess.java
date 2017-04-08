@@ -9,7 +9,11 @@ import pl.com.bottega.simplelib2.model.commands.RemoveBookCommand;
 
 public class SimpleBookManagementProcess implements BookManagementProcess {
 
-	BookRepository bookRepository;
+	private BookRepository bookRepository;
+
+	public SimpleBookManagementProcess(BookRepository bookRepository) {
+		this.bookRepository = bookRepository;
+	}
 
 	public BookId add(CreateBookCommand command) {
 		Book book = new Book(command);

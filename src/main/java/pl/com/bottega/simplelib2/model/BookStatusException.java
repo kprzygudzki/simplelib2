@@ -9,4 +9,8 @@ public class BookStatusException extends RuntimeException {
 		this.status = status;
 	}
 
+	public BookStatus getStatus() {
+		return status;
+	}
+
 }
